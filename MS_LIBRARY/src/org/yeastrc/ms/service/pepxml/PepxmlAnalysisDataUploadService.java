@@ -427,6 +427,10 @@ public class PepxmlAnalysisDataUploadService implements AnalysisDataUploadServic
                 int scanId = getScanId(runId, scan.getScanNumber());
                 
                 for(BasePeptideProphetResultIn result: scan.getScanResults()) {
+                    if(result.getPeptideProphetResult() == null)
+                    {
+                        continue;
+                    }
                     int resultId = getUploadedResultId(result, runSearchId, scanId);
                     updatePeptideProteinMatches(resultId, result);
                     uploadAnalysisResult(result, resultId, runSearchAnalysisId);      // PeptideProphet scores
@@ -704,7 +708,19 @@ public class PepxmlAnalysisDataUploadService implements AnalysisDataUploadServic
         if (prophetResultDataList.size() >= BUF_SIZE) {
             uploadPeptideProphetResultBuffer();
         }
-        
+
+        if(result.getPeptideProphetResult() == null)
+        {
+            // If for some reason the PeptideProphet results were not read
+            // throw an exception
+            UploadException e = new UploadException(ERROR_CODE.PEPXML_ERROR);
+            e.appendErrorMessage("No PeptideProphet result found for scan "
+                    + result.getSearchResult().getScanNumber()
+                    + ", charge " + result.getSearchResult().getCharge()
+                    + ", peptide " + result.getSearchResult().getResultPeptide().getPeptideSequence());
+            throw e;
+        }
+
         // add the PeptideProphet specific information for this result to the cache
         PeptideProphetResultDataBean res = new PeptideProphetResultDataBean();
         res.setRunSearchAnalysisId(rsAnalysisId);

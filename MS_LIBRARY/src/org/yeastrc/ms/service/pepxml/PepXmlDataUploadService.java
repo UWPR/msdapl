@@ -1,47 +1,20 @@
 package org.yeastrc.ms.service.pepxml;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.log4j.Logger;
 import org.yeastrc.ms.dao.DAOFactory;
 import org.yeastrc.ms.dao.run.MsRunDAO;
 import org.yeastrc.ms.dao.run.MsScanDAO;
-import org.yeastrc.ms.dao.search.MsRunSearchDAO;
-import org.yeastrc.ms.dao.search.MsSearchDAO;
-import org.yeastrc.ms.dao.search.MsSearchDatabaseDAO;
-import org.yeastrc.ms.dao.search.MsSearchModificationDAO;
-import org.yeastrc.ms.dao.search.MsSearchResultDAO;
-import org.yeastrc.ms.dao.search.MsSearchResultProteinDAO;
+import org.yeastrc.ms.dao.search.*;
 import org.yeastrc.ms.domain.analysis.peptideProphet.GenericPeptideProphetResultIn;
-import org.yeastrc.ms.domain.search.MsResidueModification;
-import org.yeastrc.ms.domain.search.MsResidueModificationIn;
-import org.yeastrc.ms.domain.search.MsResultResidueMod;
-import org.yeastrc.ms.domain.search.MsResultResidueModIds;
-import org.yeastrc.ms.domain.search.MsResultTerminalModIds;
-import org.yeastrc.ms.domain.search.MsRunSearchIn;
-import org.yeastrc.ms.domain.search.MsSearch;
-import org.yeastrc.ms.domain.search.MsSearchDatabaseIn;
-import org.yeastrc.ms.domain.search.MsSearchIn;
-import org.yeastrc.ms.domain.search.MsSearchResult;
-import org.yeastrc.ms.domain.search.MsSearchResultIn;
-import org.yeastrc.ms.domain.search.MsSearchResultProtein;
-import org.yeastrc.ms.domain.search.MsSearchResultProteinIn;
-import org.yeastrc.ms.domain.search.MsTerminalModificationIn;
-import org.yeastrc.ms.domain.search.SearchFileFormat;
+import org.yeastrc.ms.domain.search.*;
 import org.yeastrc.ms.domain.search.impl.ResultResidueModIds;
 import org.yeastrc.ms.domain.search.impl.ResultTerminalModIds;
 import org.yeastrc.ms.domain.search.impl.RunSearchBean;
 import org.yeastrc.ms.domain.search.impl.SearchResultProteinBean;
 import org.yeastrc.ms.domain.search.pepxml.PepXmlSearchScanIn;
 import org.yeastrc.ms.parser.DataProviderException;
+import org.yeastrc.ms.parser.fasta.DatabaseHelper;
+import org.yeastrc.ms.parser.fasta.UWPRParser;
 import org.yeastrc.ms.parser.pepxml.PepXmlBaseFileReader;
 import org.yeastrc.ms.parser.pepxml.PepXmlGenericFileReader;
 import org.yeastrc.ms.service.DynamicModLookupUtil;
@@ -50,6 +23,11 @@ import org.yeastrc.ms.service.UploadException;
 import org.yeastrc.ms.service.UploadException.ERROR_CODE;
 import org.yeastrc.ms.util.TimeUtils;
 import org.yeastrc.nrseq.dao.NrSeqLookupUtil;
+
+import java.io.File;
+import java.io.FilenameFilter;
+import java.sql.Connection;
+import java.util.*;
 
 public abstract class PepXmlDataUploadService <T extends PepXmlSearchScanIn<G, R>,
                                                G extends GenericPeptideProphetResultIn<R>, 
@@ -656,6 +634,40 @@ public abstract class PepXmlDataUploadService <T extends PepXmlSearchScanIn<G, R
         // get the id of the search database used (will be used to look up protein ids later)
         sequenceDatabaseId = getSearchDatabaseId(db);
 
+        if (sequenceDatabaseId == 0) {
+            // This database does not exist in the database. Parse it and upload it.
+            String fastaFile = db.getServerPath();
+            File dbFile = new File(fastaFile);
+            if(!dbFile.exists())
+            {
+                UploadException ex = new UploadException(ERROR_CODE.SEARCHDB_NOT_FOUND);
+                StringBuilder err = new StringBuilder("No database ID found for: ").append(db.getDatabaseFileName()).append(". ");
+                err.append("Attempting to parse fasta file ").append(fastaFile);
+                err.append(" Fasta file not found.");
+                ex.setErrorMessage(err.toString());
+                throw ex;
+            }
+
+            try
+            {
+                log.info("Parsing FASTA file " + fastaFile);
+                UWPRParser fastaParser = new UWPRParser();
+                Connection conn = DatabaseHelper.getConnection();
+                conn.setAutoCommit(false);
+                fastaParser.setConnection(conn);
+                fastaParser.parseFASTA(fastaFile, false);
+                conn.commit();
+                // Get the database ID of the FASTA file just uploaded
+                sequenceDatabaseId = getSearchDatabaseId(db);
+            }
+            catch(Exception e)
+            {
+                UploadException ex = new UploadException(ERROR_CODE.SEARCHDB_UPLOAD_ERROR, e);
+                ex.setErrorMessage("FASTA file could not be uploaded. " + fastaFile);
+                throw ex;
+            }
+        }
+
         // create a new entry in the MsSearch table and upload the search options, databases, enzymes etc.
         try {
             return saveSearch(search, experimentId, sequenceDatabaseId);
@@ -680,11 +692,6 @@ public abstract class PepXmlDataUploadService <T extends PepXmlSearchScanIn<G, R
                 searchDbName = db.getDatabaseFileName();
                 dbId = NrSeqLookupUtil.getDatabaseId(searchDbName);
             }
-        }
-        if (dbId == 0) {
-            UploadException ex = new UploadException(ERROR_CODE.SEARCHDB_NOT_FOUND);
-            ex.setErrorMessage("No database ID found for: "+searchDbName);
-            throw ex;
         }
         return dbId;
     }
