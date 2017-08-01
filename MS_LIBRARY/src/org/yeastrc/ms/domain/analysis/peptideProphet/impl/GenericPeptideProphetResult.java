@@ -26,6 +26,11 @@ public class GenericPeptideProphetResult <T extends MsSearchResultIn>
         this.ppRes = ppRes;
     }
 
+    public PeptideProphetResultDataIn getPeptideProphetResult()
+    {
+        return ppRes;
+    }
+
     @Override
     public double getProbabilityNet_0() {
         return ppRes.getProbabilityNet_0();

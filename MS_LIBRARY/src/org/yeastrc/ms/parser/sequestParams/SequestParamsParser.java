@@ -62,7 +62,7 @@ public class SequestParamsParser implements SearchParamsDataProvider {
     static final Pattern dynamicTermModPattern = Pattern.compile("^variable\\_([N|C])\\_terminus");
     static final Pattern staticResidueModPattern = Pattern.compile("^add\\_([A-Z])\\_[\\w]+");
     static final Pattern enzymePattern = Pattern.compile("^(\\d+)\\.\\s+(\\S+)\\s+([0|1])\\s+([[\\-]|[A-Z]]+)\\s+([[\\-]|[A-Z]]+)$");
-    protected static final Pattern modCharsPattern = Pattern.compile("[A-Z]+");
+    protected static final Pattern modCharsPattern = Pattern.compile("[A-Znc]+");
 
 
     protected static final char[] modSymbols = {'*', '#', '@', '^', '~', '$'};
@@ -312,7 +312,8 @@ public class SequestParamsParser implements SearchParamsDataProvider {
             	mod.setModificationSymbol(MsTerminalModificationIn.NTERM_MOD_CHAR_SEQUEST);
             else if(term == Terminal.CTERM)
             	mod.setModificationSymbol(MsTerminalModificationIn.CTERM_MOD_CHAR_SEQUEST);
-            dynamicTerminalModifications.add(mod);
+
+            addDynamicTerminalModification(mod);
         }
         return true;
     }
@@ -390,6 +391,11 @@ public class SequestParamsParser implements SearchParamsDataProvider {
     protected void addDynamicResidueModification(ResidueModification mod)
     {
     	dynamicResidueModifications.add(mod);
+    }
+
+    protected void addDynamicTerminalModification(TerminalModification mod)
+    {
+        dynamicTerminalModifications.add(mod);
     }
 
     // parameter_name = parameter_value ; parameter_description

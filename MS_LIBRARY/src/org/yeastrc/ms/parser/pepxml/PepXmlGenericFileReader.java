@@ -27,6 +27,7 @@ import org.yeastrc.ms.domain.analysis.peptideProphet.PeptideProphetROC;
 import org.yeastrc.ms.domain.analysis.peptideProphet.PeptideProphetROCPoint;
 import org.yeastrc.ms.domain.analysis.peptideProphet.PeptideProphetResultDataIn;
 import org.yeastrc.ms.domain.analysis.peptideProphet.PeptideProphetResultPeptideBuilder;
+import org.yeastrc.ms.domain.analysis.peptideProphet.impl.GenericPeptideProphetResult;
 import org.yeastrc.ms.domain.analysis.peptideProphet.impl.PeptideProphetResultData;
 import org.yeastrc.ms.domain.general.MsEnzyme.Sense;
 import org.yeastrc.ms.domain.general.impl.Enzyme;
@@ -710,7 +711,7 @@ public abstract class PepXmlGenericFileReader <T extends PepXmlSearchScanIn<G, R
                     String scoreVal = reader.getAttributeValue(null, "value");
                     readProgramSpecificScore(searchResult, scoreType, scoreVal);
                 }
-                // read the <analysis_result> elemets
+                // read the <analysis_result> elements
                 else if (reader.getLocalName().equalsIgnoreCase("analysis_result")) {
                     String analysisProgram = reader.getAttributeValue(null, "analysis");
                     if(analysisProgram.equalsIgnoreCase("peptideprophet")) {
@@ -906,7 +907,7 @@ public abstract class PepXmlGenericFileReader <T extends PepXmlSearchScanIn<G, R
             }
             else {
                 throw new DataProviderException("Found a match for modified residue: "+modChar+
-                        " but no match for mass: "+mass.doubleValue());
+                        " but no match for mass: "+mass.doubleValue() + " modMass: " + modMass.doubleValue() + "; massDiff: " + massDiff);
             }
         }
         throw new DataProviderException("No modification match found for : "+modChar+
