@@ -29,40 +29,6 @@ import java.util.regex.Pattern;
 
 public abstract class NR_SEQ_FASTAParser {
 
-    static {
-        try {
-            // Create initial context
-            System.setProperty(Context.INITIAL_CONTEXT_FACTORY,
-            "org.apache.naming.java.javaURLContextFactory");
-            System.setProperty(Context.URL_PKG_PREFIXES, 
-            "org.apache.naming");            
-            InitialContext ic = new InitialContext();
-
-            ic.createSubcontext("java:");
-            ic.createSubcontext("java:comp");
-            ic.createSubcontext("java:comp/env");
-            ic.createSubcontext("java:comp/env/jdbc");
-
-            // Construct YRC_NRSEQ DataSource
-            BasicDataSource ds = new BasicDataSource();
-            ds.setUrl("jdbc:mysql://"+DatabaseProperties.getNrseqDbHost()+"/"+DatabaseProperties.getNrseqDbName());
-            ds.setUsername(DatabaseProperties.getNrseqDbUser());
-            ds.setPassword(DatabaseProperties.getNrseqDbPassword());
-            ic.bind("java:comp/env/jdbc/nrseq", ds);
-
-            // Construct mainDb DataSource
-            ds = new BasicDataSource();
-            ds.setUrl("jdbc:mysql://"+DatabaseProperties.getMainDbHost()+"/"+DatabaseProperties.getMainDbName());
-            ds.setUsername(DatabaseProperties.getMainDbUser());
-            ds.setPassword(DatabaseProperties.getMainDbPassword());
-            ic.bind("java:comp/env/jdbc/yrc", ds);
-        
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
 	private static final Logger log = Logger.getLogger("FastaParserLog");
 
     private int noSpeciesFound = 0;
@@ -245,10 +211,7 @@ public abstract class NR_SEQ_FASTAParser {
 	 */
 	public abstract int getDatabaseID() throws Exception;
 	
-	
-	
-	
-	
+
 	// Mark all proteins associated with this database as not current in the protein reference table
 	private void markProteinsObsolete() throws Exception {		
 		String sql = "UPDATE tblProteinDatabase SET isCurrent = 'F' WHERE databaseID = " + getDatabaseID();
@@ -343,7 +306,6 @@ public abstract class NR_SEQ_FASTAParser {
 		
 		rs.close(); rs = null;
 		stmt.close(); stmt = null;
-		sql = null;
 		
 		return id;
 	}
@@ -366,7 +328,6 @@ public abstract class NR_SEQ_FASTAParser {
 		
 		rs.close(); rs = null;
 		stmt.close(); stmt = null;
-		sql = null;
 		
 		return id;
 	}
@@ -395,7 +356,6 @@ public abstract class NR_SEQ_FASTAParser {
 		
 		rs.close(); rs = null;
 		stmt.close(); stmt = null;
-		sql = null;
 		
 		if (proteinID == 0)
 			throw new Exception( "Got 0 for proteinID after calling insertProtein()" );
@@ -427,7 +387,6 @@ public abstract class NR_SEQ_FASTAParser {
 		
 		rs.close(); rs = null;
 		stmt.close(); stmt = null;
-		sql = null;
 		
 		if (sequenceID == 0)
 			throw new Exception( "Got 0 for sequenceID after calling insertSequence()" );
@@ -442,9 +401,7 @@ public abstract class NR_SEQ_FASTAParser {
 	protected Connection conn;
 
 	private String filename;
-	
-	
-	
+
 	/**
 	 * @return Returns the filename.
 	 */
@@ -458,15 +415,4 @@ public abstract class NR_SEQ_FASTAParser {
 	 */
 	public void setConnection( Connection connection ) { this.conn = connection; }
 
-	/**
-	 * Close and set to null the database connection used by this parser
-	 */
-	public void closeConnection() {
-		try {
-			this.conn.close();
-			this.conn = null;
-		} catch (Exception e) {
-			this.conn = null;
-		}
-	}
 }
