@@ -71,6 +71,7 @@ public class UploadException extends Exception {
         AMBIG_PROG_VERSION      ("Ambiguous analysis program version in sqt files", ERROR),
         
         SEARCHDB_NOT_FOUND      ("Fasta file not found", ERROR),
+        SEARCHDB_UPLOAD_ERROR   ("Fasta file could not be uploaded", ERROR),
         PROTEIN_NOT_FOUND       ("Protein not found in database", ERROR),
         
         SCAN_CHARGE_NOT_FOUND   ("MS2 scan charge information not found", ERROR),
