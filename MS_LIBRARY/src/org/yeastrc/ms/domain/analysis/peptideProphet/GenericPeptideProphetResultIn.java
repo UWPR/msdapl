@@ -20,4 +20,5 @@ public interface GenericPeptideProphetResultIn <T extends MsSearchResultIn>
 
     public void setPeptideProphetResult(PeptideProphetResultDataIn ppRes);
 
+    public PeptideProphetResultDataIn getPeptideProphetResult();
 }
