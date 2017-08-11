@@ -1,7 +1,7 @@
 package org.yeastrc.ms.parser.fasta;
 
-import org.apache.log4j.Logger;
 
+import org.apache.log4j.Logger;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -14,7 +14,6 @@ public class UniprotNetworkSearcher {
 	private final String SEARCH_URL = "http://www.ebi.ac.uk/cgi-bin/dbfetch?db=uniprotkb&style=raw&id=";
 
 	private static final Logger log = Logger.getLogger("FastaParserLog");
-
 	/**
 	 * Get the taxonomy ID for the supplied uniprot/swissprot database accession
 	 * string.
@@ -26,7 +25,7 @@ public class UniprotNetworkSearcher {
 		int taxid = 0;
 
 		log.info( "\nTrying Uniprot network lookup for " + accession + "..." );
-		
+
 		URL url = new URL( SEARCH_URL + accession );
 		InputStream is = url.openStream();
 		BufferedReader br = new BufferedReader( new InputStreamReader( is ) );

@@ -29,7 +29,6 @@ import java.util.regex.Pattern;
 
 public abstract class NR_SEQ_FASTAParser {
 
-    
     static {
         try {
             // Create initial context
@@ -75,6 +74,7 @@ public abstract class NR_SEQ_FASTAParser {
 	 * to standard out where the data would have been written to the database (for testing purposes)
 	 * @throws Exception If there is a problem
 	 */
+
 	public void parseFASTA(File file, boolean dryRun) throws Exception {
 		
 		log.info("Parsing: " + file.getPath() + "\n");
@@ -94,7 +94,6 @@ public abstract class NR_SEQ_FASTAParser {
 		
 		
 		while (reader.readNext( headers, sequence )) {
-
 			log.info( "\n" );
 			
 			String sequenceString = sequence.toString();
@@ -441,6 +440,7 @@ public abstract class NR_SEQ_FASTAParser {
 	
 	// the connection used by this parser
 	protected Connection conn;
+
 	private String filename;
 	
 	

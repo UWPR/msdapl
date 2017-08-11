@@ -63,7 +63,6 @@ public class UWPRParser extends MSParser {
 
             rs.close(); rs = null;
             stmt.close(); stmt = null;
-
             log.info(" \nGenerating new NR_SEQ database entry for: " + filename );
             
             sql = "INSERT INTO tblDatabase (name, description) VALUES (?, ?)";

@@ -13,7 +13,6 @@ import java.sql.ResultSet;
 import org.yeastrc.ms.parser.fasta.yrc_r1876.bio.ncbi.NetworkedProteinSearcher;
 import org.yeastrc.ms.parser.fasta.yrc_r1876.bio.protein.Protein;
 
-
 /**
  * Description of class goes here.
  * 
